@@ -214,6 +214,37 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
+-- Unlink snippet when leaving insert mode or normal mode
+vim.api.nvim_create_autocmd('ModeChanged', {
+  pattern = '*',
+  callback = function()
+    if
+      ((vim.v.event.old_mode == 's' and vim.v.event.new_mode == 'n') or vim.v.event.old_mode == 'i')
+      and require('luasnip').session.current_nodes[vim.api.nvim_get_current_buf()]
+      and not require('luasnip').session.jump_active
+    then
+      require('luasnip').unlink_current()
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd('BufWinLeave', {
+  pattern = '*',
+  callback = function()
+    if vim.fn.expand '%' ~= '' then
+      vim.cmd 'mkview'
+    end
+  end,
+})
+vim.api.nvim_create_autocmd('BufWinEnter', {
+  pattern = '*',
+  callback = function()
+    if vim.fn.expand '%' ~= '' then
+      vim.cmd 'silent! loadview'
+    end
+  end,
+})
+
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
@@ -794,6 +825,7 @@ require('lazy').setup({
         expr = true,
         replace_keycodes = false,
       })
+      vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
       vim.g.copilot_no_tab_map = true
     end,
   },
@@ -915,7 +947,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'github_light'
+      vim.cmd.colorscheme 'github_dark'
     end,
   },
 
@@ -1083,6 +1115,13 @@ require('lazy').setup({
   {
     'akinsho/toggleterm.nvim',
     opts = { open_mapping = [[<c-_>]], direction = 'float' },
+  },
+
+  {
+    'mbbill/undotree',
+    keys = {
+      { '<leader>u', vim.cmd.UndotreeToggle, desc = 'Undo Tree' },
+    },
   },
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
