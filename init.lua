@@ -182,6 +182,12 @@ require('lazy').setup {
     },
   },
   {
+    'rebelot/kanagawa.nvim',
+    config = function()
+      vim.cmd.colorscheme 'kanagawa'
+    end,
+  },
+  {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -342,15 +348,6 @@ require('lazy').setup {
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
     },
-  },
-  {
-    'projekt0n/github-nvim-theme',
-    priority = 1000,
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require 'github-theme'
-      vim.cmd.colorscheme 'github_dark'
-    end,
   },
   { -- Highlight todo, notes, etc in comments
     'folke/todo-comments.nvim',
