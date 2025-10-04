@@ -1,6 +1,6 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 
@@ -36,6 +36,8 @@ vim.o.softtabstop = 2
 vim.o.wrap = false
 
 -- [[ Basic Keymaps ]]
+
+vim.keymap.set('i', '<C-c>', '<Nop>', { noremap = true, silent = true })
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -106,9 +108,23 @@ require('lazy').setup {
   { 'NMAC427/guess-indent.nvim' },
   { 'lewis6991/gitsigns.nvim' },
   {
+    'kdheepak/lazygit.nvim',
+    lazy = true,
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    keys = { { '<leader>l', '<cmd>LazyGit<cr>', desc = 'LazyGit' } },
+  },
+  {
     'folke/which-key.nvim',
     event = 'VimEnter',
     opts = {
+      icons = { mappings = vim.g.have_nerd_font },
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
@@ -129,6 +145,7 @@ require('lazy').setup {
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       require('telescope').setup {
@@ -365,10 +382,9 @@ require('lazy').setup {
       -- Better Around/Inside textobjects
       require('mini.ai').setup { n_lines = 500 }
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      require('mini.surround').setup()
+      -- require('mini.surround').setup()
       -- Simple and easy statusline.
       local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
       statusline.setup { use_icons = vim.g.have_nerd_font }
       ---@diagnostic disable-next-line: duplicate-set-field
       statusline.section_location = function()
@@ -460,6 +476,19 @@ require('lazy').setup {
     'mbbill/undotree',
     keys = {
       { '<leader>u', vim.cmd.UndotreeToggle, desc = 'Undo Tree' },
+    },
+  },
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
     },
   },
 }
