@@ -37,8 +37,6 @@ vim.o.wrap = false
 
 -- [[ Basic Keymaps ]]
 
-vim.keymap.set('i', '<C-c>', '<Nop>', { noremap = true, silent = true })
-
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
@@ -490,5 +488,12 @@ require('lazy').setup {
     },
   },
 }
+
+-- [[ Temporary overrides ]]
+
+-- unlearn C-c for exiting insert mode (conflicts with many plugins)
+vim.keymap.set({ 'n', 'i' }, '<C-c>', function()
+  error 'nope, try again!'
+end)
 
 -- vim: ts=2 sts=2 sw=2 et
