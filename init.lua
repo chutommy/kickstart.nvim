@@ -28,7 +28,7 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 vim.o.inccommand = 'split'
 vim.o.cursorline = true
-vim.o.scrolloff = 10
+vim.o.scrolloff = 8
 vim.o.confirm = true
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
@@ -40,47 +40,12 @@ vim.o.wrap = false
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
 -- [[ Basic Autocommands ]]
-
--- Unlink snippet when leaving insert mode or normal mode
-vim.api.nvim_create_autocmd('ModeChanged', {
-  pattern = '*',
-  callback = function()
-    if
-      ((vim.v.event.old_mode == 's' and vim.v.event.new_mode == 'n') or vim.v.event.old_mode == 'i')
-      and require('luasnip').session.current_nodes[vim.api.nvim_get_current_buf()]
-      and not require('luasnip').session.jump_active
-    then
-      require('luasnip').unlink_current()
-    end
-  end,
-})
-vim.api.nvim_create_autocmd('BufWinLeave', {
-  pattern = '*',
-  callback = function()
-    if vim.fn.expand '%' ~= '' then
-      vim.cmd 'mkview'
-    end
-  end,
-})
-vim.api.nvim_create_autocmd('BufWinEnter', {
-  pattern = '*',
-  callback = function()
-    if vim.fn.expand '%' ~= '' then
-      vim.cmd 'silent! loadview'
-    end
-  end,
-})
 
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
   end,
@@ -104,7 +69,6 @@ rtp:prepend(lazypath)
 
 require('lazy').setup {
   { 'NMAC427/guess-indent.nvim' },
-  { 'lewis6991/gitsigns.nvim' },
   {
     'kdheepak/lazygit.nvim',
     lazy = true,
@@ -116,7 +80,10 @@ require('lazy').setup {
       'LazyGitFilterCurrentFile',
     },
     dependencies = { 'nvim-lua/plenary.nvim' },
-    keys = { { '<leader>l', '<cmd>LazyGit<cr>', desc = 'LazyGit' } },
+    keys = {
+      { '<leader>ll', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+      { '<leader>lc', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },
+    },
   },
   {
     'folke/which-key.nvim',
@@ -183,6 +150,16 @@ require('lazy').setup {
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
+  {
+    'projekt0n/github-nvim-theme',
+    name = 'github-theme',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require 'github-theme'
+      vim.cmd 'colorscheme github_light'
+    end,
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -197,16 +174,6 @@ require('lazy').setup {
     },
   },
   {
-    'projekt0n/github-nvim-theme',
-    name = 'github-theme',
-    lazy = false,
-    priority = 1000,
-    config = function()
-      require 'github-theme'
-      vim.cmd 'colorscheme github_light'
-    end,
-  },
-  {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -218,7 +185,7 @@ require('lazy').setup {
     },
     config = function()
       vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+        group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
         callback = function(event)
           local map = function(keys, func, desc, mode)
             mode = mode or 'n'
@@ -320,10 +287,10 @@ require('lazy').setup {
       })
       vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
       vim.g.copilot_no_tab_map = true
-      vim.g.copilot_enabled = 0
+      vim.g.copilot_enabled = 1
       vim.keymap.set('n', '<leader>c', function()
-        vim.b.copilot_enabled = not vim.b.copilot_enabled
-        print('Copilot ' .. (vim.b.copilot_enabled and 'enabled' or 'disabled'))
+        vim.g.copilot_enabled = not vim.g.copilot_enabled
+        print('Copilot ' .. (vim.g.copilot_enabled and 'enabled' or 'disabled'))
       end, { desc = 'Toggle Copilot (buffer)' })
     end,
   },
@@ -492,8 +459,6 @@ require('lazy').setup {
 -- [[ Temporary overrides ]]
 
 -- unlearn C-c for exiting insert mode (conflicts with many plugins)
-vim.keymap.set({ 'n', 'i' }, '<C-c>', function()
-  error 'nope, try again!'
-end)
+vim.keymap.set({ 'n', 'x', 'i', 'v', 't' }, '<C-c>', function() end)
 
 -- vim: ts=2 sts=2 sw=2 et
