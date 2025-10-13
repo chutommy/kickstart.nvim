@@ -81,8 +81,8 @@ require('lazy').setup {
     },
     dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
-      { '<leader>ll', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
-      { '<leader>lc', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },
+      { '<leader>gl', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+      { '<leader>gc', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },
     },
   },
   {
@@ -454,11 +454,19 @@ require('lazy').setup {
       { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
     },
   },
+  {
+    'lervag/vimtex',
+    lazy = false,
+    init = function()
+      vim.g.vimtex_view_general_viewer = 'evince'
+      vim.g.vimtex_compiler_method = 'latexmk'
+    end,
+  },
 }
 
 -- [[ Temporary overrides ]]
 
 -- unlearn C-c for exiting insert mode (conflicts with many plugins)
-vim.keymap.set({ 'n', 'x', 'i', 'v', 't' }, '<C-c>', function() end)
+vim.keymap.set({ 'n', 'x', 'i', 'v' }, '<C-c>', function() end)
 
 -- vim: ts=2 sts=2 sw=2 et
