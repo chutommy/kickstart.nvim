@@ -1,6 +1,7 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
+vim.g.dark_mode = true
 
 -- [[ Setting options ]]
 
@@ -157,7 +158,11 @@ require('lazy').setup {
     priority = 1000,
     config = function()
       require 'github-theme'
-      vim.cmd 'colorscheme github_light'
+      if vim.g.dark_mode then
+        vim.cmd.colorscheme 'github_dark'
+      else
+        vim.cmd.colorscheme 'github_light'
+      end
     end,
   },
   -- LSP Plugins
