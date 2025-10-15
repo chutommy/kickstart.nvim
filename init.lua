@@ -1,7 +1,5 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-vim.g.have_nerd_font = true
-vim.g.dark_mode = true
 
 -- [[ Setting options ]]
 
@@ -45,14 +43,16 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
+  desc = 'Hightlight selection on yank',
+  group = vim.api.nvim_create_augroup('highlight_yank', {}),
+  pattern = '*',
   callback = function()
-    vim.hl.on_yank()
+    vim.highlight.on_yank { higroup = 'IncSearch', timeout = 200 }
   end,
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
+
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
@@ -61,18 +61,15 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
     error('Error cloning lazy.nvim:\n' .. out)
   end
 end
-
----@type vim.Option
-local rtp = vim.opt.rtp
-rtp:prepend(lazypath)
+vim.opt.rtp:prepend(lazypath)
 
 -- [[ Configure and install plugins ]]
 
 require('lazy').setup {
-  { 'NMAC427/guess-indent.nvim' },
   {
     'kdheepak/lazygit.nvim',
     lazy = true,
+    dependencies = { 'nvim-lua/plenary.nvim' },
     cmd = {
       'LazyGit',
       'LazyGitConfig',
@@ -80,9 +77,8 @@ require('lazy').setup {
       'LazyGitFilter',
       'LazyGitFilterCurrentFile',
     },
-    dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
-      { '<leader>gl', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+      { '<leader>gg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
       { '<leader>gc', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },
     },
   },
@@ -158,11 +154,7 @@ require('lazy').setup {
     priority = 1000,
     config = function()
       require 'github-theme'
-      if vim.g.dark_mode then
-        vim.cmd.colorscheme 'github_dark'
-      else
-        vim.cmd.colorscheme 'github_light'
-      end
+      vim.cmd.colorscheme 'github_dark'
     end,
   },
   -- LSP Plugins
@@ -373,8 +365,6 @@ require('lazy').setup {
       indent = { enable = true },
     },
   },
-  { 'nvim-treesitter/nvim-treesitter-context' },
-  { 'windwp/nvim-autopairs', event = 'InsertEnter' },
   {
     'nvim-neo-tree/neo-tree.nvim',
     version = '*',
@@ -438,14 +428,8 @@ require('lazy').setup {
       end,
     },
   },
-  {
-    'akinsho/toggleterm.nvim',
-    opts = { open_mapping = [[<c-_>]], direction = 'float' },
-  },
-  {
-    'mbbill/undotree',
-    keys = { { '<leader>u', vim.cmd.UndotreeToggle, desc = 'Undo Tree' } },
-  },
+  { 'akinsho/toggleterm.nvim', opts = { open_mapping = [[<c-_>]], direction = 'float' } },
+  { 'mbbill/undotree', keys = { { '<leader>u', vim.cmd.UndotreeToggle, desc = 'Undo Tree' } } },
   {
     'folke/flash.nvim',
     event = 'VeryLazy',
@@ -468,10 +452,5 @@ require('lazy').setup {
     end,
   },
 }
-
--- [[ Temporary overrides ]]
-
--- unlearn C-c for exiting insert mode (conflicts with many plugins)
-vim.keymap.set({ 'n', 'x', 'i', 'v' }, '<C-c>', function() end)
 
 -- vim: ts=2 sts=2 sw=2 et
