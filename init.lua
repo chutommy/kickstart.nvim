@@ -1,47 +1,28 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- [[ Setting options ]]
-
 vim.o.number = true
 vim.o.mouse = 'a'
 vim.o.showmode = false
-
--- Sync clipboard between OS and Neovim.
-vim.schedule(function()
-  vim.o.clipboard = 'unnamedplus'
-end)
-
+vim.o.list = true
 vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.signcolumn = 'yes'
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
-
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
-vim.o.inccommand = 'split'
-vim.o.cursorline = true
+vim.o.tabstop = 2
 vim.o.scrolloff = 8
-vim.o.confirm = true
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
 vim.o.wrap = false
-
--- [[ Basic Keymaps ]]
+vim.o.clipboard = 'unnamedplus'
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
--- [[ Basic Autocommands ]]
-
--- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Hightlight selection on yank',
   group = vim.api.nvim_create_augroup('highlight_yank', {}),
@@ -50,8 +31,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank { higroup = 'IncSearch', timeout = 200 }
   end,
 })
-
--- [[ Install `lazy.nvim` plugin manager ]]
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -62,25 +41,13 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end
 vim.opt.rtp:prepend(lazypath)
-
--- [[ Configure and install plugins ]]
-
 require('lazy').setup {
   {
     'kdheepak/lazygit.nvim',
     lazy = true,
     dependencies = { 'nvim-lua/plenary.nvim' },
-    cmd = {
-      'LazyGit',
-      'LazyGitConfig',
-      'LazyGitCurrentFile',
-      'LazyGitFilter',
-      'LazyGitFilterCurrentFile',
-    },
-    keys = {
-      { '<leader>gg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
-      { '<leader>gc', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },
-    },
+    cmd = { 'LazyGit' },
+    keys = { { '<leader>g', '<cmd>LazyGit<cr>', desc = 'LazyGit' } },
   },
   {
     'folke/which-key.nvim',
@@ -333,28 +300,18 @@ require('lazy').setup {
       },
       snippets = { preset = 'luasnip' },
       fuzzy = { implementation = 'lua' },
-      -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
     },
   },
-  { -- Highlight todo, notes, etc in comments
-    'folke/todo-comments.nvim',
-    event = 'VimEnter',
-    dependencies = { 'nvim-lua/plenary.nvim' },
-    opts = { signs = false },
-  },
-  { -- Collection of various small independent plugins/modules
+  {
     'echasnovski/mini.nvim',
     config = function()
       require('mini.ai').setup { n_lines = 500 }
       require('mini.pairs').setup {}
       require('mini.statusline').setup {}
-      -- require('mini.cursorword').setup {}
-      -- require('mini.surround').setup()
-      -- require('mini.tabline').setup {}
     end,
   },
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs',
@@ -379,6 +336,7 @@ require('lazy').setup {
   {
     'lewis6991/gitsigns.nvim',
     opts = {
+      -- stylua: ignore
       on_attach = function(bufnr)
         local gitsigns = require 'gitsigns'
         local function map(mode, l, r, opts)
@@ -386,31 +344,12 @@ require('lazy').setup {
           opts.buffer = bufnr
           vim.keymap.set(mode, l, r, opts)
         end
-        -- Navigation
-        map('n', ']c', function()
-          if vim.wo.diff then
-            vim.cmd.normal { ']c', bang = true }
-          else
-            gitsigns.nav_hunk 'next'
-          end
-        end, { desc = 'Jump to next git [c]hange' })
-        --
-        map('n', '[c', function()
-          if vim.wo.diff then
-            vim.cmd.normal { '[c', bang = true }
-          else
-            gitsigns.nav_hunk 'prev'
-          end
-        end, { desc = 'Jump to previous git [c]hange' })
-        -- Actions
-        -- visual mode
-        map('v', '<leader>hs', function()
-          gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'git [s]tage hunk' })
-        map('v', '<leader>hr', function()
-          gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'git [r]eset hunk' })
-        -- normal mode
+        ---@diagnostic disable: param-type-mismatch
+        map('n', ']c', function() if vim.wo.diff then vim.cmd.normal { ']c', bang = true } else gitsigns.nav_hunk 'next' end end, { desc = 'Jump to next git [c]hange' })
+        map('n', '[c', function() if vim.wo.diff then vim.cmd.normal { '[c', bang = true } else gitsigns.nav_hunk 'prev' end end, { desc = 'Jump to previous git [c]hange' })
+        map('v', '<leader>hs', function() gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [s]tage hunk' })
+        map('v', '<leader>hr', function() gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [r]eset hunk' })
+        map('n', '<leader>hD', function() gitsigns.diffthis '@' end, { desc = 'git [D]iff against last commit' })
         map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
         map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
         map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
@@ -419,10 +358,6 @@ require('lazy').setup {
         map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
         map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
         map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
-        map('n', '<leader>hD', function()
-          gitsigns.diffthis '@'
-        end, { desc = 'git [D]iff against last commit' })
-        -- Toggles
         map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
         map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
       end,
@@ -452,5 +387,3 @@ require('lazy').setup {
     end,
   },
 }
-
--- vim: ts=2 sts=2 sw=2 et
