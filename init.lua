@@ -12,7 +12,7 @@ vim.o.smartcase = true
 vim.o.signcolumn = 'yes'
 vim.o.splitright = true
 vim.o.splitbelow = true
-vim.o.tabstop = 2
+vim.o.tabstop = 4
 vim.o.scrolloff = 8
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
@@ -190,6 +190,7 @@ require('lazy').setup {
         pyright = {},
         ruff = {},
         lua_ls = {},
+        gopls = {},
       }
       -- Ensure the servers and tools above are installed
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -224,31 +225,19 @@ require('lazy').setup {
     },
     opts = {
       notify_on_error = false,
+      -- stylua: ignore
       format_on_save = function(bufnr)
         local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
+        if disable_filetypes[vim.bo[bufnr].filetype] then return nil
+        else return { timeout_ms = 500, lsp_format = 'fallback' } end
       end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- python = { "isort", "black" },
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
-      },
+      formatters_by_ft = { lua = { 'stylua' } },
     },
   },
   {
     'github/copilot.vim',
     config = function()
-      vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
-        expr = true,
-        replace_keycodes = false,
-      })
+      vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false })
       vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_enabled = 1
@@ -304,11 +293,12 @@ require('lazy').setup {
     },
   },
   {
-    'echasnovski/mini.nvim',
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
-      require('mini.ai').setup { n_lines = 500 }
-      require('mini.pairs').setup {}
-      require('mini.statusline').setup {}
+      require('lualine').setup {
+        options = { globalstatus = true },
+      }
     end,
   },
   {
@@ -372,10 +362,10 @@ require('lazy').setup {
     opts = {},
     -- stylua: ignore
     keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash', },
+      { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash Treesitter', },
+      { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote Flash', },
+      { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter Search', },
     },
   },
   {
