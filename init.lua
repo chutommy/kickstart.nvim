@@ -369,6 +369,12 @@ require('lazy').setup {
     },
   },
   {
+    'echasnovski/mini.nvim',
+    config = function()
+      require('mini.ai').setup()
+    end,
+  },
+  {
     'lervag/vimtex',
     lazy = false,
     init = function()
